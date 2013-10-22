@@ -85,11 +85,15 @@ $('input[name="daterange"]').daterangepicker(
 
 `cancelClass`: (string) CSS class string that will be added to the cancel button
 
+`clearClass`: (string) CSS class string that will be added to the clear button
+
 `format`: (string) Date/time format string used by moment when parsing or displaying the selected dates
 
 `separator`: (string) Separator string to display between the start and end date when populating a text input the picker is attached to
 
 `locale`: (object) Allows you to provide localized strings for buttons and labels, and the first day of week for the calendars
+
+`nullable`: (boolean) Default to false, indicates if the range picker is nullable or not, if it's nullable, the clear button will be appeared. Click at the clear button will clear the current selection, the callback function will be called with two null arguments
 
 ## License
 

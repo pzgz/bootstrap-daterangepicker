@@ -23,7 +23,7 @@
                     <label class="control-label" for="reservation">Reservation dates:</label>
                     <div class="controls">
                      <div class="input-prepend">
-                       <span class="add-on"><i class="glyphicon glyphicon-calendar icon-calendar"></i></span><input type="text" style="width: 200px" name="reservation" id="reservation" value="03/18/2013 - 03/23/2013" /> 
+                       <span class="add-on"><i class="glyphicon glyphicon-calendar icon-calendar"></i></span><input type="text" style="width: 200px" name="reservation" id="reservation" value="03/18/2013 - 03/23/2013" />
                      </div>
                     </div>
                   </div>
@@ -60,12 +60,13 @@
                   $('#reservationtime').daterangepicker({
                     timePicker: true,
                     timePickerIncrement: 30,
+                    nullable: true,
                     format: 'MM/DD/YYYY h:mm A'
                   });
                });
                </script>
 
-            </div>            
+            </div>
 
             <h4>Options Usage Example</h4>
 

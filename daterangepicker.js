@@ -31,13 +31,18 @@
         this.buttonClasses = ['btn', 'btn-small'];
         this.applyClass = 'btn-success';
         this.cancelClass = 'btn-default';
+        this.clearClass = 'btn-warning';
 
         this.format = 'MM/DD/YYYY';
         this.separator = ' - ';
 
+        this.nullable = false;
+        this.cleared = false;
+
         this.locale = {
             applyLabel: 'Apply',
             cancelLabel: 'Cancel',
+            clearLabel: 'Clear',
             fromLabel: 'From',
             toLabel: 'To',
             weekLabel: 'W',
@@ -83,6 +88,14 @@
             if (options.cancelClass) {
                 this.cancelClass = options.cancelClass;
             }
+
+            if (options.clearClass) {
+                this.clearClass = options.clearClass;
+            }
+
+            if (typeof options.nullable == 'boolean') {
+                this.nullable = options.nullable;
+            }
         }
 
         var DRPTemplate = '<div class="daterangepicker dropdown-menu">' +
@@ -99,6 +112,7 @@
                       '<input class="input-mini" type="text" name="daterangepicker_end" value="" disabled="disabled" />' +
                     '</div>' +
                     '<button class="' + this.applyClass + ' applyBtn" disabled="disabled">' + this.locale.applyLabel + '</button>&nbsp;' +
+                    (this.nullable ? '<button class="' + this.clearClass + ' clearBtn">' + this.locale.clearLabel + '</button>&nbsp;' : '') +
                     '<button class="' + this.cancelClass + ' cancelBtn">' + this.locale.cancelLabel + '</button>' +
                   '</div>' +
                 '</div>' +
@@ -219,7 +233,6 @@
             if (typeof options.timePicker12Hour == 'boolean') {
                 this.timePicker12Hour = options.timePicker12Hour;
             }
-
         }
 
         if (!this.timePicker) {
@@ -288,6 +301,7 @@
         this.container.find('.calendar').on('click', '.next', $.proxy(this.clickNext, this));
         this.container.find('.ranges').on('click', 'button.applyBtn', $.proxy(this.clickApply, this));
         this.container.find('.ranges').on('click', 'button.cancelBtn', $.proxy(this.clickCancel, this));
+        this.container.find('.ranges').on('click', 'button.clearBtn', $.proxy(this.clickClear, this));
 
         this.container.find('.ranges').on('click', '.daterangepicker_start_input', $.proxy(this.showCalendars, this));
         this.container.find('.ranges').on('click', '.daterangepicker_end_input', $.proxy(this.showCalendars, this));
@@ -326,8 +340,13 @@
             this.leftCalendar.month.month(this.startDate.month()).year(this.startDate.year());
             this.rightCalendar.month.month(this.endDate.month()).year(this.endDate.year());
 
-            this.container.find('input[name=daterangepicker_start]').val(this.startDate.format(this.format));
-            this.container.find('input[name=daterangepicker_end]').val(this.endDate.format(this.format));
+            if (this.nullable && this.cleared) {
+                this.container.find('input[name=daterangepicker_start]').val('');
+                this.container.find('input[name=daterangepicker_end]').val('');
+            } else {
+                this.container.find('input[name=daterangepicker_start]').val(this.startDate.format(this.format));
+                this.container.find('input[name=daterangepicker_end]').val(this.endDate.format(this.format));
+            }
 
             if (this.startDate.isSame(this.endDate) || this.startDate.isBefore(this.endDate)) {
                 this.container.find('button.applyBtn').removeAttr('disabled');
@@ -361,7 +380,11 @@
 
         notify: function () {
             this.updateView();
-            this.cb(this.startDate, this.endDate);
+            if (this.nullable && this.cleared) {
+                this.cb(null, null);
+            } else {
+                this.cb(this.startDate, this.endDate);
+            }
         },
 
         move: function () {
@@ -412,7 +435,7 @@
         hide: function (e) {
             this.container.hide();
 
-            if (!this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate))
+            if ((this.nullable && this.cleared) || (!this.startDate.isSame(this.oldStartDate) || !this.endDate.isSame(this.oldEndDate)))
                 this.notify();
 
             this.oldStartDate = this.startDate.clone();
@@ -439,6 +462,8 @@
         },
 
         updateInputText: function() {
+            if (this.nullable && this.cleared)
+                this.element.val('');
             if (this.element.is('input'))
                 this.element.val(this.startDate.format(this.format) + this.separator + this.endDate.format(this.format));
         },
@@ -556,6 +581,16 @@
             this.startDate = this.oldStartDate;
             this.endDate = this.oldEndDate;
             this.updateView();
+            this.updateCalendars();
+            this.hide();
+        },
+
+        clickClear: function (e) {
+            // When clear button has been clicked
+            this.startDate = moment().startOf('day');
+            this.endDate = moment().startOf('day');
+            this.changed = true;
+            this.cleared = true;
             this.updateCalendars();
             this.hide();
         },
